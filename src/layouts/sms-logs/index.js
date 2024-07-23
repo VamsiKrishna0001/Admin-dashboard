@@ -13,9 +13,36 @@ import DataTable from "examples/Tables/DataTable";
 
 // Data
 import tableData from "layouts/sms-logs/data/tableData";
+import { useDispatch } from "react-redux";
+import { useAppSelector } from "hooks";
+import { SmsListUsers } from "services/dashboard";
+import { useEffect, useState } from "react";
+import { fetchSmsUsers } from "reducers/analytics";
 
 function InviteUsersTable() {
-  const { columns, rows } = tableData();
+  const customEntriesPerPage = { defaultValue: 10, entries: [10, 25, 50] };
+  const access_token = localStorage.getItem('admin_access_token');
+  const {sms_users_list} = useAppSelector((state)=> state?.analytics);
+  const dispatch = useDispatch()
+  const [data, setData] = useState(sms_users_list)
+  const [pageSize, setPageSize] = useState(customEntriesPerPage.defaultValue)
+  const { columns, rows } = tableData(sms_users_list);
+  const [totalRows, setTotalRows] = useState(sms_users_list ? sms_users_list?.total : 0);
+  const [pageIndex, setPageIndex] = useState(1);
+
+
+  const usersList = async (pageIndex, pageize) => {
+    const result = await SmsListUsers(pageIndex, pageize);
+    dispatch(fetchSmsUsers(result));
+    return {
+      total: result.total,
+      users: result.users,
+    };
+  }
+
+  useEffect(() =>{
+    usersList(0, pageSize)
+  },[]);
 
   return (
     <DashboardLayout>
@@ -46,6 +73,9 @@ function InviteUsersTable() {
                   showTotalEntries={false}
                   noEndBorder
                   canSearch={true}
+                  totalRows={totalRows}
+                  pageIndex={pageIndex}
+                  pageSize={pageSize}
                 />
               </MDBox>
             </Card>

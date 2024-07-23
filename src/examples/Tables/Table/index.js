@@ -23,7 +23,7 @@ function DataTable({
   pagination,
   isSorted,
   noEndBorder,
-  totalRows,
+  handleSearch
 }) {
   const defaultValue = entriesPerPage.defaultValue ? entriesPerPage.defaultValue : 10;
   const entries =["10", "25", "50"];
@@ -80,7 +80,9 @@ function DataTable({
   const [search, setSearch] = useState(globalFilter);
 
   const onSearchChange = useAsyncDebounce((value) => {
-    setGlobalFilter(value || undefined);
+    // setGlobalFilter(value || undefined);
+    handleSearch(value);
+
   }, 100);
 
   const setSortedValue = (column) => {
@@ -104,7 +106,7 @@ function DataTable({
   if (pageIndex === 0) {
     entriesEnd = pageSize;
   } else if (pageIndex === pageOptions.length - 1) {
-    entriesEnd = totalRows;
+    entriesEnd = rows.length;
   } else {
     entriesEnd = pageSize * (pageIndex + 1);
   }
@@ -124,8 +126,8 @@ function DataTable({
             sx={{ width: "5rem" }}
             renderInput={(params) => <MDInput {...params} />}
           />
-          <MDTypography variant="caption" color="secondary">
-            &nbsp;&nbsp;entries per page
+          <MDTypography variant="h6" color="secondary">
+            &nbsp;&nbsp; Entries per page
           </MDTypography>
         </MDBox>
         {canSearch && (
@@ -136,6 +138,7 @@ function DataTable({
               size="small"
               fullWidth
               onChange={({ currentTarget }) => {
+                console.log("search", search, currentTarget.value);
                 setSearch(search);
                 onSearchChange(currentTarget.value);
               }}
@@ -263,8 +266,8 @@ DataTable.propTypes = {
     ]),
   }),
   isSorted: PropTypes.bool,
-  noEndBorder: PropTypes.bool,
-  totalRows: PropTypes.number.isRequired,
+  noEndBorder: PropTypes,
+  handleSearch: PropTypes.func,
 };
 
 export default DataTable;

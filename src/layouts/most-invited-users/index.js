@@ -9,13 +9,50 @@ import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
-import DataTable from "examples/Tables/DataTable";
+import DataTable from "examples/Tables/Table";
 
 // Data
 import tableData from "layouts/most-invited-users/data/tableData";
+import { fetchMostInvitedUsers } from "reducers/analytics";
+import { useAppSelector } from "hooks";
+import { useDispatch } from "react-redux";
+import { MostInviteListUsers } from "services/dashboard";
+import { useEffect, useState } from "react";
 
 function MostInviteUsersTable() {
-  const { columns, rows } = tableData();
+  const customEntriesPerPage = { defaultValue: 10, entries: [10, 25, 50] };
+  const access_token = localStorage.getItem('admin_access_token');
+  const {most_invited_users_list} = useAppSelector((state)=> state?.analytics);
+  const dispatch = useDispatch()
+  const [data, setData] = useState(most_invited_users_list ? most_invited_users_list?.users : [])
+  const [filterData, setFilterData] = useState(most_invited_users_list?.users);
+  let { columns, rows } = tableData(data);
+
+  const handleSearch = (search) => {
+    const lowerCaseSearch = search.toString().toLowerCase();
+    const filteredRows = filterData.filter(([str, num]) => {
+      return (
+        str.toLowerCase().includes(lowerCaseSearch) || 
+        num.toString().includes(lowerCaseSearch)
+      );
+    });
+    setData(filteredRows)
+  }
+  
+
+  const usersList = async (access_token)=>{
+    const result = await MostInviteListUsers(access_token);
+    dispatch(fetchMostInvitedUsers(result));
+    setData(result);
+  }
+
+  useEffect(() =>{
+    // usersList(access_token)
+  },[]);
+
+  useEffect(()=> {
+
+  },[data])
 
   return (
     <DashboardLayout>
@@ -46,6 +83,7 @@ function MostInviteUsersTable() {
                   showTotalEntries={false}
                   noEndBorder
                   canSearch={true}
+                  handleSearch={handleSearch}
                 />
               </MDBox>
             </Card>

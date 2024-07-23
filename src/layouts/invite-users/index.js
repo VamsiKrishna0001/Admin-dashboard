@@ -13,9 +13,29 @@ import DataTable from "examples/Tables/DataTable";
 
 // Data
 import inviteUsersTableData from "layouts/invite-users/data/inviteUsersTableData";
+import { useAppSelector } from "hooks";
+import { useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
+import { fetchInvitedUsers } from "reducers/analytics";
+import { InviteListUsers } from "services/dashboard";
 
 function InviteUsersTable() {
-  const { columns, rows } = inviteUsersTableData();
+  const customEntriesPerPage = { defaultValue: 10, entries: [10, 25, 50] };
+  const access_token = localStorage.getItem('admin_access_token');
+  const {invite_users_list} = useAppSelector((state)=> state?.analytics);
+  const dispatch = useDispatch()
+  const [data, setData] = useState(invite_users_list)
+  const { columns, rows } = inviteUsersTableData(invite_users_list);
+
+
+  const usersList = async (access_token)=>{
+    const result = await InviteListUsers(access_token);
+    dispatch(fetchInvitedUsers(result));
+  }
+
+  useEffect(() =>{
+    usersList(access_token)
+  },[]);
 
   return (
     <DashboardLayout>
@@ -42,7 +62,7 @@ function InviteUsersTable() {
                 <DataTable
                   table={{ columns, rows }}
                   isSorted={false}
-                  entriesPerPage={false}
+                  entriesPerPage={customEntriesPerPage}
                   showTotalEntries={false}
                   noEndBorder
                   canSearch={true}

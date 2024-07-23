@@ -35,6 +35,8 @@ function App() {
   } = controller;
   const { pathname } = useLocation();
   const [onMouseEnter, setOnMouseEnter] = useState(false);
+
+  const adminAccessToken = localStorage.getItem('admin_access_token');
   const getRoutes = (allRoutes) =>
     allRoutes.map((route) => {
       if (route.collapse) {
@@ -114,7 +116,7 @@ function App() {
       <CssBaseline />
       <Routes>
       {getRoutes(routes)}
-        <Route path="*" element={<Navigate to="/login" />} />
+        {adminAccessToken === null && <Route path="*" element={<Navigate to="/login" />} />}
       </Routes>
     </ThemeProvider>
   );

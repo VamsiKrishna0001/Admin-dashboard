@@ -13,7 +13,7 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // @mui material components
 import Card from "@mui/material/Card";
@@ -22,14 +22,47 @@ import Switch from "@mui/material/Switch";
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
+import { useDispatch } from "react-redux";
+import { ConfigurationsSettings, Configurations } from "services/dashboard";
+import { fetchConfiguration } from "reducers/analytics";
+import { useAppSelector } from "hooks";
+import MDButton from "components/MDButton";
 
 function PlatformSettings() {
-  const [followsMe, setFollowsMe] = useState(true);
-  const [answersPost, setAnswersPost] = useState(false);
-  const [mentionsMe, setMentionsMe] = useState(true);
-  const [newLaunches, setNewLaunches] = useState(false);
-  const [productUpdate, setProductUpdate] = useState(true);
-  const [newsletter, setNewsletter] = useState(false);
+  const access_token = localStorage.getItem('admin_access_token');
+  const {configuration_settings} = useAppSelector((state)=> state?.analytics);
+  const [bypassInviteUser, setBypassInviteUser] = useState(configuration_settings?.bypass_invite_user);
+  const [byPassSms, setByPassSms] = useState(configuration_settings?.bypass_sms);
+  const [byPassNumber, setByPassNumber] = useState(configuration_settings?.bypass_number);
+
+  const dispatch = useDispatch()
+  const usersList = async (access_token)=>{
+    const result = await ConfigurationsSettings(access_token);
+    dispatch(fetchConfiguration(result));
+  }
+
+  const update_configuration = async () => {
+    const data = {
+      bypass_invite_user: bypassInviteUser,
+      bypass_sms: byPassSms,
+      bypass_number: byPassNumber,
+    };
+    const result = await Configurations(access_token, data);
+    if (result.status === 200) {
+      alert("Configurations updated successfully");
+      dispatch(fetchConfiguration(result.data));
+    } else {
+      alert("Failed to update configurations");
+    }
+  };
+
+  useEffect(() =>{
+    usersList(access_token)
+  },[]);
+
+  useEffect(() =>{
+
+  },[bypassInviteUser, byPassSms, byPassNumber])
 
   return (
     <Card sx={{ boxShadow: "none" }}>
@@ -49,7 +82,7 @@ function PlatformSettings() {
             </MDTypography>
           </MDBox>
           <MDBox mt={0.5}>
-            <Switch checked={followsMe} onChange={() => setFollowsMe(!followsMe)} />
+            <Switch checked={bypassInviteUser} onChange={() => setBypassInviteUser(!bypassInviteUser)} />
           </MDBox>
         </MDBox>
         <MDBox display="flex" alignItems="center" mb={0.5} ml={-1.5}>
@@ -59,7 +92,7 @@ function PlatformSettings() {
             </MDTypography>
           </MDBox>
           <MDBox mt={0.5}>
-            <Switch checked={answersPost} onChange={() => setAnswersPost(!answersPost)} />
+            <Switch checked={byPassSms} onChange={() => setByPassSms(!byPassSms)} />
           </MDBox>
         </MDBox>
         <MDBox display="flex" alignItems="center" mb={0.5} ml={-1.5}>
@@ -69,10 +102,15 @@ function PlatformSettings() {
             </MDTypography>
           </MDBox>
           <MDBox mt={0.5}>
-            <Switch checked={mentionsMe} onChange={() => setMentionsMe(!mentionsMe)} />
+            <Switch checked={byPassNumber} onChange={() => setByPassNumber(!byPassNumber)} />
           </MDBox>
         </MDBox>
 
+      </MDBox>
+      <MDBox p={2}>
+        <MDButton variant="gradient" color="info" onClick={update_configuration}>
+         Save
+        </MDButton>
       </MDBox>
     </Card>
   );

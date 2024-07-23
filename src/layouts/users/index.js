@@ -13,14 +13,31 @@ import DataTable from "examples/Tables/DataTable";
 
 // Data
 import tableData from "layouts/users/data/tableData";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAppSelector } from "hooks";
+import { AllUsers } from "services/dashboard";
+import { fetchAllUsers } from "reducers/analytics";
+import { useDispatch } from "react-redux";
 
 function UsersTable() {
+  const access_token = localStorage.getItem('admin_access_token');
+  const {all_users_list} = useAppSelector((state)=> state?.analytics);
+  const dispatch = useDispatch()
+  const [data, setData] = useState(all_users_list)
   const [open, setOpen] = useState(false);
-
+  const customEntriesPerPage = { defaultValue: 10, entries: [10, 25, 50] };
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const { columns, rows } = tableData(handleOpen);
+  const { columns, rows } = tableData(data, handleOpen);
+
+  const usersList = async (access_token)=>{
+    const result = await AllUsers(access_token);
+    dispatch(fetchAllUsers(result));
+  }
+
+  useEffect(() =>{
+    usersList(access_token)
+  },[]);
 
   return (
     <DashboardLayout>
@@ -47,10 +64,11 @@ function UsersTable() {
                 <DataTable
                   table={{ columns, rows }}
                   isSorted={false}
-                  entriesPerPage={false}
+                  entriesPerPage={customEntriesPerPage}
                   showTotalEntries={false}
                   noEndBorder
                   canSearch={true}
+                  set
                 />
               </MDBox>
             </Card>

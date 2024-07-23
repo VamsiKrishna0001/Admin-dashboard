@@ -16,10 +16,55 @@ import WeekendIcon from "@mui/icons-material/Weekend";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import StoreIcon from "@mui/icons-material/Store";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { Analytics } from "services/dashboard";
+import { fetchAnalytics } from "reducers/analytics";
+import { useAppSelector } from "hooks";
+import { UserGrowthGraph } from "services/dashboard";
+import { fetchUsersGrowthGraph } from "reducers/analytics";
+import { UserAttributeGraph } from "services/dashboard";
+import { fetchUsersAttributesGraph } from "reducers/analytics";
 
 function Dashboard() {
-  const { sales, tasks } = reportsLineChartData;
+  const dispatch = useDispatch();
+  const { sales } = reportsLineChartData;
+  const access_token = localStorage.getItem('admin_access_token');
+  const {anlaytics_list: analytics, user_growth_graph, user_attribute_graph } = useAppSelector((state)=> state?.analytics);
 
+  let growth_data = {
+    labels: user_growth_graph === undefined ? [] : user_growth_graph?.date_list,
+    datasets: { label: "Users Joined", data: user_growth_graph === undefined ? [] : user_growth_graph?.dates},
+  }
+
+  let attribute_data = {
+    labels: user_attribute_graph === undefined ? [] : user_attribute_graph?.user_attributes,
+    datasets: { label: "Users Joined", data: user_growth_graph === undefined ? [] : user_attribute_graph?.attributes_count},
+  }
+  
+  console.log("analytics", user_attribute_graph);
+
+
+  const analyticsData = async (access_token)=>{
+    const result = await Analytics(access_token);
+    dispatch(fetchAnalytics(result));
+  }
+
+  const userGrowthData = async (access_token)=>{
+    const result = await UserGrowthGraph(access_token);
+    dispatch(fetchUsersGrowthGraph(result));
+  }
+  
+  const userAttributeData = async (access_token)=>{
+    const result = await UserAttributeGraph(access_token);
+    dispatch(fetchUsersAttributesGraph(result));
+  }
+
+  useEffect(()=>{
+    // analyticsData()
+    userGrowthData()
+    userAttributeData()
+  },[])
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -31,7 +76,7 @@ function Dashboard() {
                 color="dark"
                 icon={<WeekendIcon />}
                 title="Users In Wait List"
-                count={281}
+                count={analytics === undefined || null ? 0 : analytics?.avg_users_on_wait_list}
                 percentage={{
                   color: "success",
                   amount: "+55%",
@@ -45,7 +90,7 @@ function Dashboard() {
               <ComplexStatisticsCard
                 icon={<LeaderboardIcon />}
                 title="% INVITED USERS WHO SIGNED UP"
-                count="2,300"
+                count={analytics === undefined || null ? 0 : analytics?.avg_invited_user}
                 percentage={{
                   color: "success",
                   amount: "+3%",
@@ -60,7 +105,7 @@ function Dashboard() {
                 color="success"
                 icon={<StoreIcon />}
                 title="USER WHO SENT INVITE"
-                count="34k"
+                count={analytics === undefined || null ? 0 : analytics?.avg_invited_user}
                 percentage={{
                   color: "success",
                   amount: "+1%",
@@ -75,7 +120,7 @@ function Dashboard() {
                 color="primary"
                 icon={<PersonAddIcon />}
                 title="AVG NO OF REQUEST SENT PER USER"
-                count="+91"
+                count={analytics === undefined || null ? 0 : analytics?.avg_invited_user}
                 percentage={{
                   color: "success",
                   amount: "",
@@ -90,7 +135,7 @@ function Dashboard() {
                 color="dark"
                 icon={<WeekendIcon />}
                 title="% OF USERS ON WAITLIST"
-                count={281}
+                count={analytics === undefined || null ? 0 : analytics?.avg_users_on_wait_list}
                 percentage={{
                   color: "success",
                   amount: "+55%",
@@ -104,7 +149,7 @@ function Dashboard() {
               <ComplexStatisticsCard
                 icon={<LeaderboardIcon />}
                 title="% OF USERS PRESETS"
-                count="2,300"
+                count={analytics === undefined || null ? 0 : analytics?.avg_users_preset}
                 percentage={{
                   color: "success",
                   amount: "+3%",
@@ -119,7 +164,7 @@ function Dashboard() {
                 color="success"
                 icon={<StoreIcon />}
                 title="AVG NO OF SHARED ATTRIBUTES"
-                count="34k"
+                count={analytics === undefined || null ? 0 : analytics?.shared_attribute_connection}
                 percentage={{
                   color: "success",
                   amount: "+1%",
@@ -134,7 +179,7 @@ function Dashboard() {
                 color="primary"
                 icon={<PersonAddIcon />}
                 title="ON BOARDING TIME"
-                count="+91"
+                count={analytics === undefined || null ? 0 : analytics?.onboarding_time_avg}
                 percentage={{
                   color: "success",
                   amount: "",
@@ -149,7 +194,7 @@ function Dashboard() {
                 color="dark"
                 icon={<WeekendIcon />}
                 title="AVG NO OF CONNECTION ADDED BY SEARCH"
-                count={281}
+                count={analytics === undefined || null ? 0 : analytics?.avg_number_of_connection_added_via_search}
                 percentage={{
                   color: "success",
                   amount: "+55%",
@@ -162,8 +207,8 @@ function Dashboard() {
             <MDBox mb={1.5}>
               <ComplexStatisticsCard
                 icon={<LeaderboardIcon />}
-                title="AVG NO OF CONTACTS ADDED BY SEARCH"
-                count="2,300"
+                title="AVG NO OF MUTUAL CONTACTS ADDED BY SEARCH"
+                count={analytics === undefined || null ? 0 : analytics?.avg_number_of_manual_contact_added_via_search}
                 percentage={{
                   color: "success",
                   amount: "+3%",
@@ -178,7 +223,7 @@ function Dashboard() {
                 color="success"
                 icon={<StoreIcon />}
                 title="% OF SUCCESSFUL AUTHENTICATION"
-                count="34k"
+                count={analytics === undefined || null ? 0 : analytics?.percentage_successful_authentication}
                 percentage={{
                   color: "success",
                   amount: "+1%",
@@ -193,7 +238,7 @@ function Dashboard() {
                 color="primary"
                 icon={<PersonAddIcon />}
                 title="% SUCCESSFUL PASSWORD RESETS"
-                count="+91"
+                count={analytics === undefined || null ? 0 : analytics?.percentage_successful_authentication}
                 percentage={{
                   color: "success",
                   amount: "",
@@ -208,7 +253,7 @@ function Dashboard() {
                 color="dark"
                 icon={<WeekendIcon />}
                 title="NOTIFICATION ENABLED PERCENTAGE"
-                count={281}
+                count={analytics === undefined || null ? 0 : analytics?.percentage_of_push_notification}
                 percentage={{
                   color: "success",
                   amount: "+55%",
@@ -222,7 +267,7 @@ function Dashboard() {
               <ComplexStatisticsCard
                 icon={<LeaderboardIcon />}
                 title="% USER IMPORTED CONTACTS"
-                count="2,300"
+                count={analytics === undefined || null ? 0 : analytics?.users_import_connection_percentage}
                 percentage={{
                   color: "success",
                   amount: "+3%",
@@ -241,7 +286,7 @@ function Dashboard() {
                   title="User Attribute Graph"
                   description="User Attribute Percentage"
                   // date="campaign sent 2 days ago"
-                  chart={reportsBarChartData}
+                  chart={attribute_data}
                 />
               </MDBox>
             </Grid>
@@ -264,10 +309,10 @@ function Dashboard() {
               <MDBox mb={3}>
                 <ReportsLineChart
                   color="dark"
-                  title="completed tasks"
+                  title="User Growth Report"
                   description="Last Campaign Performance"
                   date="just updated"
-                  chart={tasks}
+                  chart={growth_data}
                 />
               </MDBox>
             </Grid>

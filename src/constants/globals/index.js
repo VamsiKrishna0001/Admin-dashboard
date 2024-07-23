@@ -1,0 +1,1 @@
+export const BaseURL = process.env.LOCAL_URL || 'http://localhost:8000'
