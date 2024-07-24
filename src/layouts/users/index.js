@@ -28,15 +28,76 @@ function UsersTable() {
   const customEntriesPerPage = { defaultValue: 10, entries: [10, 25, 50] };
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const { columns, rows } = tableData(data, handleOpen);
+  const { columns, rows } = tableData(all_users_list, handleOpen);
+  const [pageSize, setPageSize] = useState(10)
+  const [totalRows, setTotalRows] = useState(all_users_list ? all_users_list?.total : 0);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [isSearch, setIsSearch] = useState(false);
+  const [search, setSearch] = useState('');
 
-  const usersList = async (access_token)=>{
-    const result = await AllUsers(access_token);
+  const previousPage = async ()=> {
+    if (pageIndex >= 0) {
+      await usersList(pageIndex-1, pageSize)
+      setPageIndex(pageIndex-1)
+    }
+  }
+
+  const nextPage =async ()=> {
+    if (pageIndex >= 0) {
+      await usersList(pageIndex+1, pageSize)
+      setPageIndex(pageIndex+1)
+    }
+  }
+
+  const setEntriesPerPage = async (value) =>{
+    if (pageIndex >= 0) {
+      await usersList(pageIndex, value)
+      setPageSize(value);
+    }
+  }
+  // const previousPage = async ()=> {
+  //   if (pageIndex >= 0) {
+  //     !isSearch ? await usersList(pageIndex-1, pageSize) : await searchList(pageIndex-1, pageSize, search)
+  //     setPageIndex(pageIndex-1)
+  //   }
+  // }
+
+  // const nextPage =async ()=> {
+  //   if (pageIndex >= 0) {
+  //     !isSearch ? await usersList(pageIndex+1, pageSize) : await searchList(pageIndex+1, pageSize, search)
+  //     setPageIndex(pageIndex+1)
+  //   }
+  // }
+
+  // const setEntriesPerPage = async (value) =>{
+  //   if (pageIndex >= 0) {
+  //     !isSearch ? await usersList(pageIndex, value) : await searchList(pageIndex, value, search)
+  //     setPageSize(value);
+  //   }
+  // }
+
+
+  const searchList = async (pageIndex, pageSize, search)=> {
+    // const result = await SearchInSmstUsers(pageIndex, pageSize, search);
+    // setSearch(search);
+    // dispatch(fetchSmsUsers(result));
+    // return {
+    //   total: result.total,
+    //   users: result.users,
+    // };
+  }
+
+  const usersList = async (pageIndex, pageSize) =>{
+    const result = await AllUsers (pageIndex, pageSize);
     dispatch(fetchAllUsers(result));
+    return {
+      total: result.total,
+      users: result.users,
+    };
   }
 
   useEffect(() =>{
-    usersList(access_token)
+    usersList(pageIndex, pageSize)
   },[]);
 
   return (
@@ -65,10 +126,19 @@ function UsersTable() {
                   table={{ columns, rows }}
                   isSorted={false}
                   entriesPerPage={customEntriesPerPage}
-                  showTotalEntries={false}
+                  showTotalEntries={true}
                   noEndBorder
                   canSearch={true}
-                  set
+                  totalRows={totalRows}
+                  pageIndex={pageIndex}
+                  pageSize={pageSize}
+                  setPageIndex={setPageIndex}
+                  setPageSize={setPageSize}
+                  previousPage={previousPage}
+                  nextPage={nextPage}
+                  setEntriesPerPage={setEntriesPerPage}
+                  searchList={searchList}
+                  setIsSearch={setIsSearch}
                 />
               </MDBox>
             </Card>

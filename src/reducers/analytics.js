@@ -2,8 +2,8 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     anlaytics_list: null,
-    user_growth_graph: null,
-    user_attribute_graph: null,
+    user_growth_graph: {},
+    user_attribute_graph: {},
     all_users_list: {},
     invite_users_list: {},
     most_invited_users_list: {},

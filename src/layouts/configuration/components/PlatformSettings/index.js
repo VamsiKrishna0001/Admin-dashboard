@@ -36,8 +36,8 @@ function PlatformSettings() {
   const [byPassNumber, setByPassNumber] = useState(configuration_settings?.bypass_number);
 
   const dispatch = useDispatch()
-  const usersList = async (access_token)=>{
-    const result = await ConfigurationsSettings(access_token);
+  const usersList = async ()=>{
+    const result = await ConfigurationsSettings();
     dispatch(fetchConfiguration(result));
   }
 
@@ -47,7 +47,7 @@ function PlatformSettings() {
       bypass_sms: byPassSms,
       bypass_number: byPassNumber,
     };
-    const result = await Configurations(access_token, data);
+    const result = await Configurations(data);
     if (result.status === 200) {
       alert("Configurations updated successfully");
       dispatch(fetchConfiguration(result.data));
@@ -57,7 +57,7 @@ function PlatformSettings() {
   };
 
   useEffect(() =>{
-    usersList(access_token)
+    usersList()
   },[]);
 
   useEffect(() =>{

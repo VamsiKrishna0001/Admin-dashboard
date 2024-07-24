@@ -2,22 +2,15 @@ import Grid from "@mui/material/Grid";
 import MDBox from "components/MDBox";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
 import ReportsBarChart from "examples/Charts/BarCharts/ReportsBarChart";
 import ReportsLineChart from "examples/Charts/LineCharts/ReportsLineChart";
 import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
-
-import reportsBarChartData from "layouts/dashboard/data/reportsBarChartData";
-import reportsLineChartData from "layouts/dashboard/data/reportsLineChartData";
-
-import Projects from "layouts/dashboard/components/Projects";
-import OrdersOverview from "layouts/dashboard/components/OrdersOverview";
 import WeekendIcon from "@mui/icons-material/Weekend";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import StoreIcon from "@mui/icons-material/Store";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Analytics } from "services/dashboard";
 import { fetchAnalytics } from "reducers/analytics";
 import { useAppSelector } from "hooks";
@@ -28,43 +21,52 @@ import { fetchUsersAttributesGraph } from "reducers/analytics";
 
 function Dashboard() {
   const dispatch = useDispatch();
-  const { sales } = reportsLineChartData;
   const access_token = localStorage.getItem('admin_access_token');
   const {anlaytics_list: analytics, user_growth_graph, user_attribute_graph } = useAppSelector((state)=> state?.analytics);
+  const [attributeData, setAttributeData] = useState([]);
 
   let growth_data = {
     labels: user_growth_graph === undefined ? [] : user_growth_graph?.date_list,
     datasets: { label: "Users Joined", data: user_growth_graph === undefined ? [] : user_growth_graph?.dates},
   }
-
-  let attribute_data = {
-    labels: user_attribute_graph === undefined ? [] : user_attribute_graph?.user_attributes,
-    datasets: { label: "Users Joined", data: user_growth_graph === undefined ? [] : user_attribute_graph?.attributes_count},
-  }
   
-  console.log("analytics", user_attribute_graph);
+  const attribute_data = {
+    labels: user_attribute_graph ? user_attribute_graph.user_attributes : [],
+    datasets: [ {
+      label: "Users Attributes",
+      tension: 0.4,
+      borderWidth: 0,
+      borderRadius: 4,
+      borderSkipped: false,
+      backgroundColor: "rgba(255, 255, 255, 0.8)",
+      data: attributeData,
+      maxBarThickness: 6,
+    },],
+  };
 
 
-  const analyticsData = async (access_token)=>{
-    const result = await Analytics(access_token);
+  const analyticsData = async ()=>{
+    const result = await Analytics();
     dispatch(fetchAnalytics(result));
   }
 
-  const userGrowthData = async (access_token)=>{
-    const result = await UserGrowthGraph(access_token);
+  const userGrowthData = async ()=>{
+    const result = await UserGrowthGraph();
     dispatch(fetchUsersGrowthGraph(result));
   }
   
-  const userAttributeData = async (access_token)=>{
-    const result = await UserAttributeGraph(access_token);
+  const userAttributeData = async ()=>{
+    const result = await UserAttributeGraph();
     dispatch(fetchUsersAttributesGraph(result));
+    setAttributeData(result.attributes_count);
   }
 
-  useEffect(()=>{
-    // analyticsData()
-    userGrowthData()
-    userAttributeData()
-  },[])
+  useEffect(() => {
+    analyticsData()
+    userGrowthData();
+    userAttributeData();
+  }, []);
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -285,26 +287,11 @@ function Dashboard() {
                   color="info"
                   title="User Attribute Graph"
                   description="User Attribute Percentage"
-                  // date="campaign sent 2 days ago"
+                  date="campaign sent 2 days ago"
                   chart={attribute_data}
                 />
               </MDBox>
             </Grid>
-            {/* <Grid item xs={12} md={6} lg={4}>
-              <MDBox mb={3}>
-                <ReportsLineChart
-                  color="success"
-                  title="daily sales"
-                  description={
-                    <>
-                      (<strong>+15%</strong>) increase in today sales.
-                    </>
-                  }
-                  date="updated 4 min ago"
-                  chart={sales}
-                />
-              </MDBox>
-            </Grid> */}
             <Grid item xs={12} md={12} lg={12}>
               <MDBox mb={3}>
                 <ReportsLineChart
@@ -319,17 +306,8 @@ function Dashboard() {
           </Grid>
         </MDBox>
         <MDBox>
-          {/* <Grid container spacing={3}>
-            <Grid item xs={12} md={6} lg={8}>
-              <Projects />
-            </Grid>
-            <Grid item xs={12} md={6} lg={4}>
-              <OrdersOverview />
-            </Grid>
-          </Grid> */}
         </MDBox>
       </MDBox>
-      {/* <Footer /> */}
     </DashboardLayout>
   );
 }

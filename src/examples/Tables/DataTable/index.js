@@ -24,12 +24,21 @@ function DataTable({
   isSorted,
   noEndBorder,
   totalRows,
+  setPageIndex,
+  pageSize,
+  pageIndex,
+  setPageSize,
+  nextPage,
+  previousPage,
+  setEntriesPerPage,
+  setIsSearch,
+  searchList
+
 }) {
   const defaultValue = entriesPerPage.defaultValue ? entriesPerPage.defaultValue : 10;
   const entries =["10", "25", "50"];
   const columns = useMemo(() => table.columns, [table]);
   const data = useMemo(() => table.rows, [table]);
-
   const tableInstance = useTable(
     { columns, data, initialState: { pageIndex: 0 } },
     useGlobalFilter,
@@ -43,21 +52,20 @@ function DataTable({
     headerGroups,
     prepareRow,
     rows,
-    page,
-    pageOptions,
-    canPreviousPage,
-    canNextPage,
     gotoPage,
-    nextPage,
-    previousPage,
-    setPageSize,
     setGlobalFilter,
-    state: { pageIndex, pageSize, globalFilter },
+    state: { globalFilter },
   } = tableInstance;
 
   useEffect(() => setPageSize(defaultValue || 10), [defaultValue]);
+  
 
-  const setEntriesPerPage = (value) => setPageSize(value);
+  function getPageOptions(totalRows, pageSize) {
+    const totalPages = Math.ceil(totalRows / pageSize);
+    return Array.from({ length: totalPages }, (_, index) => index);
+  }
+
+  const pageOptions = getPageOptions(totalRows, pageSize);
 
   const renderPagination = pageOptions.map((option) => (
     <MDPagination
@@ -70,18 +78,20 @@ function DataTable({
     </MDPagination>
   ));
 
-  const handleInputPagination = ({ target: { value } }) =>
-    value > pageOptions.length || value < 0 ? gotoPage(0) : gotoPage(Number(value));
 
   const customizedPageOptions = pageOptions.map((option) => option + 1);
 
-  const handleInputPaginationValue = ({ target: value }) => gotoPage(Number(value.value - 1));
 
   const [search, setSearch] = useState(globalFilter);
 
   const onSearchChange = useAsyncDebounce((value) => {
-    setGlobalFilter(value || undefined);
-  }, 100);
+    searchList(pageIndex, pageSize, value);
+    if (value.length > 0) {
+      setIsSearch(true);
+    }else{
+      setIsSearch(false);
+    }
+  }, 400);
 
   const setSortedValue = (column) => {
     let sortedValue;
@@ -162,7 +172,7 @@ function DataTable({
           ))}
         </MDBox>
         <TableBody {...getTableBodyProps()}>
-          {page.map((row, key) => {
+          {rows.map((row, key) => {
             prepareRow(row);
             return (
               <TableRow key={key} {...row.getRowProps()}>
@@ -189,10 +199,10 @@ function DataTable({
         alignItems={{ xs: "flex-start", sm: "center" }}
         p={!showTotalEntries && pageOptions.length === 1 ? 0 : 3}
       >
-        {showTotalEntries && (
+        { showTotalEntries && (
           <MDBox mb={{ xs: 3, sm: 0 }}>
             <MDTypography variant="button" color="secondary" fontWeight="regular">
-              Showing {entriesStart} to {entriesEnd} of {rows.length} entries
+              Showing {entriesStart} to {entriesEnd} of {totalRows} entries
             </MDTypography>
           </MDBox>
         )}
@@ -201,23 +211,23 @@ function DataTable({
             variant={pagination.variant ? pagination.variant : "gradient"}
             color={pagination.color ? pagination.color : "info"}
           >
-            {canPreviousPage && (
+            {pageIndex >= 1 && (
               <MDPagination item onClick={() => previousPage()}>
                 <Icon sx={{ fontWeight: "bold" }}><KeyboardDoubleArrowLeftIcon/></Icon>
               </MDPagination>
             )}
             {renderPagination.length > 6 ? (
-              <MDBox width="5rem" mx={1}>
+              <MDBox width="3rem" mx={1}>
                 <MDInput
                   inputProps={{ type: "number", min: 1, max: customizedPageOptions.length }}
                   value={customizedPageOptions[pageIndex]}
-                  onChange={(handleInputPagination, handleInputPaginationValue)}
+                  disabled
                 />
               </MDBox>
             ) : (
               renderPagination
             )}
-            {canNextPage && (
+            {pageIndex < pageOptions.length  && (
               <MDPagination item onClick={() => nextPage()}>
                 <Icon sx={{ fontWeight: "bold" }}>{<KeyboardDoubleArrowRightIcon/>}</Icon>
               </MDPagination>
@@ -265,6 +275,13 @@ DataTable.propTypes = {
   isSorted: PropTypes.bool,
   noEndBorder: PropTypes.bool,
   totalRows: PropTypes.number.isRequired,
+  setPageIndex: PropTypes.func,
+  setPageSize: PropTypes.func,
+  previousPage: PropTypes.func,
+  nextPage: PropTypes.func,
+  setEntriesPerPage: PropTypes.func,
+  searchList: PropTypes.func,
+  setIsSearch: PropTypes.func,
 };
 
 export default DataTable;

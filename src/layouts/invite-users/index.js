@@ -18,6 +18,7 @@ import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { fetchInvitedUsers } from "reducers/analytics";
 import { InviteListUsers } from "services/dashboard";
+import { SearchInInviteListUsers } from "services/dashboard";
 
 function InviteUsersTable() {
   const customEntriesPerPage = { defaultValue: 10, entries: [10, 25, 50] };
@@ -26,15 +27,55 @@ function InviteUsersTable() {
   const dispatch = useDispatch()
   const [data, setData] = useState(invite_users_list)
   const { columns, rows } = inviteUsersTableData(invite_users_list);
+  const [pageSize, setPageSize] = useState(10)
+  const [totalRows, setTotalRows] = useState(invite_users_list ? invite_users_list?.total : 0);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [isSearch, setIsSearch] = useState(false);
+  const [search, setSearch] = useState('');
 
 
-  const usersList = async (access_token)=>{
-    const result = await InviteListUsers(access_token);
+  const previousPage = async ()=> {
+    if (pageIndex >= 0) {
+      !isSearch ? await usersList(pageIndex-1, pageSize) : await searchList(pageIndex-1, pageSize, search)
+      setPageIndex(pageIndex-1)
+    }
+  }
+
+  const nextPage =async ()=> {
+    if (pageIndex >= 0) {
+      !isSearch ? await usersList(pageIndex+1, pageSize) : await searchList(pageIndex+1, pageSize, search)
+      setPageIndex(pageIndex+1)
+    }
+  }
+
+  const setEntriesPerPage = async (value) =>{
+    if (pageIndex >= 0) {
+      !isSearch ? await usersList(pageIndex, value) : await searchList(pageIndex, value, search)
+      setPageSize(value);
+    }
+  }
+
+  const usersList = async (pageIndex, pageSize) => {
+    const result = await InviteListUsers(pageIndex, pageSize);
     dispatch(fetchInvitedUsers(result));
+    return {
+      total: result.total,
+      users: result.users,
+    };
+  }
+
+  const searchList = async (pageIndex, pageSize, search)=> {
+    const result = await SearchInInviteListUsers(pageIndex, pageSize, search);
+    setSearch(search);
+    dispatch(fetchInvitedUsers(result));
+    return {
+      total: result.total,
+      users: result.users,
+    };
   }
 
   useEffect(() =>{
-    usersList(access_token)
+    usersList(pageIndex, pageSize)
   },[]);
 
   return (
@@ -63,9 +104,19 @@ function InviteUsersTable() {
                   table={{ columns, rows }}
                   isSorted={false}
                   entriesPerPage={customEntriesPerPage}
-                  showTotalEntries={false}
+                  showTotalEntries={true}
                   noEndBorder
                   canSearch={true}
+                  totalRows={totalRows}
+                  pageIndex={pageIndex}
+                  pageSize={pageSize}
+                  setPageIndex={setPageIndex}
+                  setPageSize={setPageSize}
+                  previousPage={previousPage}
+                  nextPage={nextPage}
+                  setEntriesPerPage={setEntriesPerPage}
+                  searchList={searchList}
+                  setIsSearch={setIsSearch}
                 />
               </MDBox>
             </Card>

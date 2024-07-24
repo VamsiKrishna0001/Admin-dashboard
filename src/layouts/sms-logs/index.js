@@ -18,6 +18,7 @@ import { useAppSelector } from "hooks";
 import { SmsListUsers } from "services/dashboard";
 import { useEffect, useState } from "react";
 import { fetchSmsUsers } from "reducers/analytics";
+import { SearchInSmstUsers } from "services/dashboard";
 
 function InviteUsersTable() {
   const customEntriesPerPage = { defaultValue: 10, entries: [10, 25, 50] };
@@ -25,14 +26,47 @@ function InviteUsersTable() {
   const {sms_users_list} = useAppSelector((state)=> state?.analytics);
   const dispatch = useDispatch()
   const [data, setData] = useState(sms_users_list)
-  const [pageSize, setPageSize] = useState(customEntriesPerPage.defaultValue)
+  const [pageSize, setPageSize] = useState(10)
   const { columns, rows } = tableData(sms_users_list);
   const [totalRows, setTotalRows] = useState(sms_users_list ? sms_users_list?.total : 0);
-  const [pageIndex, setPageIndex] = useState(1);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [isSearch, setIsSearch] = useState(false);
+  const [search, setSearch] = useState('');
+
+  const previousPage = async ()=> {
+    if (pageIndex >= 0) {
+      !isSearch ? await usersList(pageIndex-1, pageSize) : await searchList(pageIndex-1, pageSize, search)
+      setPageIndex(pageIndex-1)
+    }
+  }
+
+  const nextPage =async ()=> {
+    if (pageIndex >= 0) {
+      !isSearch ? await usersList(pageIndex+1, pageSize) : await searchList(pageIndex+1, pageSize, search)
+      setPageIndex(pageIndex+1)
+    }
+  }
+
+  const setEntriesPerPage = async (value) =>{
+    if (pageIndex >= 0) {
+      !isSearch ? await usersList(pageIndex, value) : await searchList(pageIndex, value, search)
+      setPageSize(value);
+    }
+  }
 
 
-  const usersList = async (pageIndex, pageize) => {
-    const result = await SmsListUsers(pageIndex, pageize);
+  const usersList = async (pageIndex, pageSize) => {
+    const result = await SmsListUsers(pageIndex, pageSize);
+    dispatch(fetchSmsUsers(result));
+    return {
+      total: result.total,
+      users: result.users,
+    };
+  }
+
+  const searchList = async (pageIndex, pageSize, search)=> {
+    const result = await SearchInSmstUsers(pageIndex, pageSize, search);
+    setSearch(search);
     dispatch(fetchSmsUsers(result));
     return {
       total: result.total,
@@ -41,7 +75,7 @@ function InviteUsersTable() {
   }
 
   useEffect(() =>{
-    usersList(0, pageSize)
+    usersList(pageIndex, pageSize)
   },[]);
 
   return (
@@ -70,12 +104,19 @@ function InviteUsersTable() {
                   table={{ columns, rows }}
                   isSorted={false}
                   entriesPerPage={false}
-                  showTotalEntries={false}
+                  showTotalEntries={true}
                   noEndBorder
                   canSearch={true}
                   totalRows={totalRows}
                   pageIndex={pageIndex}
                   pageSize={pageSize}
+                  setPageIndex={setPageIndex}
+                  setPageSize={setPageSize}
+                  previousPage={previousPage}
+                  nextPage={nextPage}
+                  setEntriesPerPage={setEntriesPerPage}
+                  searchList={searchList}
+                  setIsSearch={setIsSearch}
                 />
               </MDBox>
             </Card>
