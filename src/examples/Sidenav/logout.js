@@ -4,8 +4,10 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDInput from "components/MDInput";
 import MDButton from "components/MDButton";
+import GradientCircularProgress from "components/MDLoader";
+import { CircularProgress } from "@mui/material";
 
-export default function LogoutModal({ open, handleClose, handleLogout }) {
+export default function LogoutModal({ open, handleClose, handleLogout, loader }) {
   return (
     <Modal open={open} onClose={handleClose}>
       <MDBox
@@ -30,8 +32,8 @@ export default function LogoutModal({ open, handleClose, handleLogout }) {
               Cancel
             </MDButton>
             <MDButton variant="contained" size="small" color="primary" onClick={handleLogout}>
-              Logout
-            </MDButton>
+              Logout 
+            </MDButton>{loader ? <CircularProgress size={"2rem"}/> : null} 
           </MDBox>
         </MDBox>
       </MDBox>

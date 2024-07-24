@@ -4,8 +4,31 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDInput from "components/MDInput";
 import MDButton from "components/MDButton";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { SendNotification } from "services/dashboard";
+import { showSuccessToast } from "components/MDToast";
 
-export default function NotificationModal({ open, handleClose }) {
+// Validation schema
+const validationSchema = Yup.object({
+  title: Yup.string().required("Title is required"),
+  subtitle: Yup.string().required("Subtitle is required"),
+  message: Yup.string().required("Message is required"),
+  usernames: Yup.string().required("Usernames are required"),
+  type: Yup.string().required("Message Type is required"),
+});
+
+export default function NotificationModal({ open, handleClose, data }) {
+  const handleSubmit = async (values) => {
+    // Handle form submission here
+    console.log(values);
+    handleClose(); // Close the modal on successful submission
+    const result = await SendNotification(values);
+    if(result){
+      showSuccessToast("Notification sent successfully", true);
+    }
+  };
+
   return (
     <Modal open={open} onClose={handleClose}>
       <MDBox
@@ -24,21 +47,88 @@ export default function NotificationModal({ open, handleClose }) {
         <MDTypography variant="h6" component="h2" textAlign={"center"}>
           Send Notification
         </MDTypography>
-        <MDBox component="form" mt={2}>
-          <MDInput fullWidth label="Title" margin="normal" />
-          <MDInput fullWidth label="Subtitle" margin="normal" />
-          <MDInput fullWidth label="Message" margin="normal" multiline rows={4} />
-          <MDInput fullWidth label="Usernames" margin="normal" />
-          <MDInput fullWidth label="Message Type" margin="normal" />
-          <MDBox mt={2} display="flex" justifyContent="space-between">
-            <MDButton variant="outlined" color="secondary" onClick={handleClose}>
-              Close
-            </MDButton>
-            <MDButton variant="contained" color="primary">
-              Send
-            </MDButton>
-          </MDBox>
-        </MDBox>
+        <Formik
+          initialValues={{
+            title: '',
+            subtitle: '',
+            message: '',
+            usernames: data?.username,
+            type: 'Admin Notification',
+          }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ errors, touched }) => (
+            <Form>
+              <MDBox mt={2}>
+                <Field
+                  as={MDInput}
+                  fullWidth
+                  label="Title"
+                  margin="normal"
+                  name="title"
+                  error={touched.title && Boolean(errors.title)}
+                  helperText={<ErrorMessage name="title" />}
+                />
+              </MDBox>
+              <MDBox mt={2}>
+                <Field
+                  as={MDInput}
+                  fullWidth
+                  label="Subtitle"
+                  margin="normal"
+                  name="subtitle"
+                  error={touched.subtitle && Boolean(errors.subtitle)}
+                  helperText={<ErrorMessage name="subtitle" />}
+                />
+              </MDBox>
+              <MDBox mt={2}>
+                <Field
+                  as={MDInput}
+                  fullWidth
+                  label="Message"
+                  margin="normal"
+                  name="message"
+                  multiline
+                  rows={4}
+                  error={touched.message && Boolean(errors.message)}
+                  helperText={<ErrorMessage name="message" />}
+                />
+              </MDBox>
+              <MDBox mt={2}>
+                <Field
+                  as={MDInput}
+                  fullWidth
+                  disabled
+                  label="Username"
+                  margin="normal"
+                  name="usernames"
+                  error={touched.usernames && Boolean(errors.usernames)}
+                  helperText={<ErrorMessage name="usernames" />}
+                />
+              </MDBox>
+              <MDBox mt={2}>
+                <Field
+                  as={MDInput}
+                  fullWidth
+                  label="Message Type"
+                  margin="normal"
+                  name="type"
+                  error={touched.type && Boolean(errors.type)}
+                  helperText={<ErrorMessage name="type" />}
+                />
+              </MDBox>
+              <MDBox mt={2} display="flex" justifyContent="space-between">
+                <MDButton variant="outlined" color="secondary" type="button" onClick={handleClose}>
+                  Close
+                </MDButton>
+                <MDButton variant="contained" color="primary" type="submit">
+                  Send
+                </MDButton>
+              </MDBox>
+            </Form>
+          )}
+        </Formik>
       </MDBox>
     </Modal>
   );

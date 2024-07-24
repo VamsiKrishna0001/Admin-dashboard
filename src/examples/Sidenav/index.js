@@ -1,18 +1,3 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.2.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 import { useEffect, useState } from "react";
 
 // react-router-dom components
@@ -47,6 +32,9 @@ import {
   setWhiteSidenav,
 } from "context";
 import LogoutModal from "./logout";
+import { logout } from "services/auth";
+import { showSuccessToast } from "components/MDToast";
+import GradientCircularProgress from "components/MDLoader";
 
 function Sidenav({ color, brand, brandName, routes, ...rest }) {
   const [controller, dispatch] = useMaterialUIController();
@@ -55,6 +43,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
   const collapseName = location.pathname.replace("/", "");
   const [isOpen, setOpen] = useState(false);
   const navigate = useNavigate();
+  const [isLoader, setLoader] = useState(false);
 
   let textColor = "white";
 
@@ -94,8 +83,14 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
     setOpen(false)
   }
 
-  const handleLogout = () => {
-    navigate('/login')
+  const handleLogout = async () => {
+    setLoader(true)
+    const result = await logout()
+    if(result){
+      setLoader(false)
+      showSuccessToast("Logged out", true)
+      navigate('/login')
+    }
   }
 
   // Render all the routes from the routes.js (All the visible items on the Sidenav)
@@ -204,7 +199,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
           Logout
         </MDButton>
       </MDBox>
-      <LogoutModal open={isOpen} handleClose={handleCloseLogout} handleLogout= {handleLogout}/>
+      {<LogoutModal open={isOpen} handleClose={handleCloseLogout} handleLogout= {handleLogout} loader={isLoader}/> }
     </SidenavRoot>
   );
 }

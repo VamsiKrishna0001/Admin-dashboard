@@ -148,6 +148,26 @@ export const SearchInSmstUsers = async (pageIndex, pageSize, search) => {
   }
 };
 
+export const SearchInUsers = async (pageIndex, pageSize, search) => {
+  try {
+    const access_token = localStorage.getItem("admin_access_token");
+    const headers = {
+      accessToken: access_token,
+    };
+    const response = await axios.post(
+      BaseURL + "/admin/search_all_users",
+      { search_name: search },
+      {
+        params: { limit: pageSize, offset: pageIndex * pageSize },
+        headers,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const ConfigurationsSettings = async () => {
   try {
     const access_token = localStorage.getItem("admin_access_token");

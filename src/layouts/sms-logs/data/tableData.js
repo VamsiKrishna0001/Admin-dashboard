@@ -15,25 +15,25 @@ export default function data(data) {
   
   let rows = [];
       if(data !== undefined){
-        rows = data?.users?.map(user => ({
+        rows = data?.map(user => ({
           phoneNumber: (
-            <MDTypography component="a" href="#" variant="caption" color="text" fontWeight="medium">
+            <MDTypography  variant="caption" color="text" fontWeight="medium">
              {user?.phonenumber}
             </MDTypography>
           ),
-          Sender: ( <MDTypography component="a" href="#" variant="caption" color="text" fontWeight="medium">
+          Sender: ( <MDTypography  variant="caption" color="text" fontWeight="medium">
           {user?.sender}
         </MDTypography>),
-          Content:  ( <MDTypography component="a" href="#" variant="caption" color="text" fontWeight="medium">
+          Content:  ( <MDTypography variant="caption" color="text" fontWeight="medium">
            {user?.content}
         </MDTypography>),
           type: (
-            <MDTypography component="a" href="#" variant="caption" color="text" fontWeight="medium">
+            <MDTypography  variant="caption" color="text" fontWeight="medium">
                {user?.type}
             </MDTypography>
           ),
           created_at: (
-            <MDTypography component="a" href="#" variant="caption" color="text" fontWeight="medium">
+            <MDTypography  variant="caption" color="text" fontWeight="medium">
              {user?.created_at?.slice(0, 10)}
           </MDTypography>
           ),

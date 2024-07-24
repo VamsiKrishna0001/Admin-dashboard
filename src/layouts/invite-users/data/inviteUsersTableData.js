@@ -16,7 +16,7 @@ const columns = [
 
 let rows = [];
     if(data !== undefined){
-      rows = data?.users?.map(user => ({
+      rows = data?.map(user => ({
         phoneNumber: (
           <MDTypography component="a" href="#" variant="caption" color="text" fontWeight="medium">
            {user?.phonenumber}

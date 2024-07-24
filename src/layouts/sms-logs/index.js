@@ -21,13 +21,11 @@ import { fetchSmsUsers } from "reducers/analytics";
 import { SearchInSmstUsers } from "services/dashboard";
 
 function InviteUsersTable() {
-  const customEntriesPerPage = { defaultValue: 10, entries: [10, 25, 50] };
-  const access_token = localStorage.getItem('admin_access_token');
   const {sms_users_list} = useAppSelector((state)=> state?.analytics);
   const dispatch = useDispatch()
-  const [data, setData] = useState(sms_users_list)
+  const [data, setData] = useState(sms_users_list ? sms_users_list?.users: [])
   const [pageSize, setPageSize] = useState(10)
-  const { columns, rows } = tableData(sms_users_list);
+  const { columns, rows } = tableData(data);
   const [totalRows, setTotalRows] = useState(sms_users_list ? sms_users_list?.total : 0);
   const [pageIndex, setPageIndex] = useState(0);
   const [isSearch, setIsSearch] = useState(false);
@@ -58,6 +56,8 @@ function InviteUsersTable() {
   const usersList = async (pageIndex, pageSize) => {
     const result = await SmsListUsers(pageIndex, pageSize);
     dispatch(fetchSmsUsers(result));
+    setData(result?.users);
+    setTotalRows(result.total)
     return {
       total: result.total,
       users: result.users,
@@ -68,6 +68,8 @@ function InviteUsersTable() {
     const result = await SearchInSmstUsers(pageIndex, pageSize, search);
     setSearch(search);
     dispatch(fetchSmsUsers(result));
+    setData(result?.users);
+    setTotalRows(result.total)
     return {
       total: result.total,
       users: result.users,

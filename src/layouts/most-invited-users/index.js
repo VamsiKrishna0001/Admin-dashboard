@@ -40,14 +40,14 @@ function MostInviteUsersTable() {
   }
   
 
-  const usersList = async (access_token)=>{
-    const result = await MostInviteListUsers(access_token);
+  const usersList = async ()=>{
+    const result = await MostInviteListUsers();
     dispatch(fetchMostInvitedUsers(result));
-    setData(result);
+    setData(result?.users);
   }
 
   useEffect(() =>{
-    // usersList(access_token)
+    usersList()
   },[]);
 
   useEffect(()=> {
@@ -80,7 +80,7 @@ function MostInviteUsersTable() {
                   table={{ columns, rows }}
                   isSorted={false}
                   entriesPerPage={false}
-                  showTotalEntries={false}
+                  showTotalEntries={true}
                   noEndBorder
                   canSearch={true}
                   handleSearch={handleSearch}

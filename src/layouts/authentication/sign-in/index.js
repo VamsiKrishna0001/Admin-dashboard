@@ -14,23 +14,29 @@ import * as Yup from "yup";
 import bgImage from "assets/images/bg-sign-in-basic.jpeg";
 import { login } from "services/auth";
 import { useNavigate } from "react-router-dom";
+import { showSuccessToast } from "components/MDToast";
 
 const Basic = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate()
   const validationSchema = Yup.object({
-    email: Yup.string().email("Invalid email address").required("Required"),
+    number: Yup.number()
+    .typeError("Must be a number")
+    .integer("Must be an integer")
+    .positive("Must be a positive number")
+    .required("Required"),
     password: Yup.string().min(6, "Password must be at least 6 characters").required("Required"),
   });
   const formik = useFormik({
     initialValues: {
-      email: "",
+      number: "",
       password: "",
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
-     const result = await login(values.email, values.password);
+     const result = await login(values.number, values.password);
      if (result){
+      showSuccessToast("Logged in", true)
       navigate('/dashboard')
      }
     },
@@ -60,15 +66,15 @@ const Basic = () => {
           {/* <MDBox component="form" role="form"> */}
             <MDBox mb={2}>
             <MDInput
-                type="email"
-                label="Email"
+                type="number"
+                label="Phone Number"
                 fullWidth
-                name="email"
-                value={formik.values.email}
+                name="number"
+                value={formik.values.number}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                error={formik.touched.email && Boolean(formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
+                error={formik.touched.number && Boolean(formik.errors.number)}
+                helperText={formik.touched.number && formik.errors.number}
               />
             </MDBox>
             <MDBox mb={2}>

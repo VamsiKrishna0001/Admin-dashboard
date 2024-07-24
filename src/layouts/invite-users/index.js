@@ -25,8 +25,8 @@ function InviteUsersTable() {
   const access_token = localStorage.getItem('admin_access_token');
   const {invite_users_list} = useAppSelector((state)=> state?.analytics);
   const dispatch = useDispatch()
-  const [data, setData] = useState(invite_users_list)
-  const { columns, rows } = inviteUsersTableData(invite_users_list);
+  const [data, setData] = useState(invite_users_list ? invite_users_list?.users: [])
+  const { columns, rows } = inviteUsersTableData(data);
   const [pageSize, setPageSize] = useState(10)
   const [totalRows, setTotalRows] = useState(invite_users_list ? invite_users_list?.total : 0);
   const [pageIndex, setPageIndex] = useState(0);
@@ -58,6 +58,8 @@ function InviteUsersTable() {
   const usersList = async (pageIndex, pageSize) => {
     const result = await InviteListUsers(pageIndex, pageSize);
     dispatch(fetchInvitedUsers(result));
+    setData(result.users)
+    setTotalRows(result.total)
     return {
       total: result.total,
       users: result.users,
@@ -68,6 +70,8 @@ function InviteUsersTable() {
     const result = await SearchInInviteListUsers(pageIndex, pageSize, search);
     setSearch(search);
     dispatch(fetchInvitedUsers(result));
+    setData(result.users)
+    setTotalRows(result.total)
     return {
       total: result.total,
       users: result.users,

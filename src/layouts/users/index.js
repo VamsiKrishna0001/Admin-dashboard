@@ -18,17 +18,39 @@ import { useAppSelector } from "hooks";
 import { AllUsers } from "services/dashboard";
 import { fetchAllUsers } from "reducers/analytics";
 import { useDispatch } from "react-redux";
+import { BlockUser } from "services/dashboard";
+import { SearchInUsers } from "services/dashboard";
 
 function UsersTable() {
   const access_token = localStorage.getItem('admin_access_token');
   const {all_users_list} = useAppSelector((state)=> state?.analytics);
   const dispatch = useDispatch()
-  const [data, setData] = useState(all_users_list)
+  const [notificationData, setNotificationData] = useState({})
+  const [data, setData] = useState(all_users_list ? all_users_list?.users : [])
   const [open, setOpen] = useState(false);
   const customEntriesPerPage = { defaultValue: 10, entries: [10, 25, 50] };
-  const handleOpen = () => setOpen(true);
+  const handleOpen = (user) => {
+    setNotificationData(user);
+    setOpen(true);
+  }
   const handleClose = () => setOpen(false);
-  const { columns, rows } = tableData(all_users_list, handleOpen);
+  const handleBlockUser = async (user) => {
+    const payload = {
+      phoneNumber: user.phoneNumber,
+      block_user: !user.block
+    }
+    const result = await BlockUser(payload);
+    if(result){
+      setData(prevData => {
+        return prevData.map(item => 
+            item.userID === user.userID 
+            ? { ...item, block: !item.block } 
+            : item
+        );
+      });
+    }
+  }
+  const { columns, rows } = tableData(data, handleOpen, handleBlockUser);
   const [pageSize, setPageSize] = useState(10)
   const [totalRows, setTotalRows] = useState(all_users_list ? all_users_list?.total : 0);
   const [pageIndex, setPageIndex] = useState(0);
@@ -37,59 +59,45 @@ function UsersTable() {
 
   const previousPage = async ()=> {
     if (pageIndex >= 0) {
-      await usersList(pageIndex-1, pageSize)
+      !isSearch ? await usersList(pageIndex-1, pageSize) : await searchList(pageIndex-1, pageSize, search)
       setPageIndex(pageIndex-1)
     }
   }
 
   const nextPage =async ()=> {
     if (pageIndex >= 0) {
-      await usersList(pageIndex+1, pageSize)
+      !isSearch ? await usersList(pageIndex+1, pageSize) : await searchList(pageIndex+1, pageSize, search)
       setPageIndex(pageIndex+1)
     }
   }
 
   const setEntriesPerPage = async (value) =>{
     if (pageIndex >= 0) {
-      await usersList(pageIndex, value)
+      !isSearch ? await usersList(pageIndex, value) : await searchList(pageIndex, value, search)
       setPageSize(value);
     }
   }
-  // const previousPage = async ()=> {
-  //   if (pageIndex >= 0) {
-  //     !isSearch ? await usersList(pageIndex-1, pageSize) : await searchList(pageIndex-1, pageSize, search)
-  //     setPageIndex(pageIndex-1)
-  //   }
-  // }
-
-  // const nextPage =async ()=> {
-  //   if (pageIndex >= 0) {
-  //     !isSearch ? await usersList(pageIndex+1, pageSize) : await searchList(pageIndex+1, pageSize, search)
-  //     setPageIndex(pageIndex+1)
-  //   }
-  // }
-
-  // const setEntriesPerPage = async (value) =>{
-  //   if (pageIndex >= 0) {
-  //     !isSearch ? await usersList(pageIndex, value) : await searchList(pageIndex, value, search)
-  //     setPageSize(value);
-  //   }
-  // }
 
 
   const searchList = async (pageIndex, pageSize, search)=> {
-    // const result = await SearchInSmstUsers(pageIndex, pageSize, search);
-    // setSearch(search);
-    // dispatch(fetchSmsUsers(result));
-    // return {
-    //   total: result.total,
-    //   users: result.users,
-    // };
+    const result = await SearchInUsers(pageIndex, pageSize, search);
+    setSearch(search);
+    dispatch(fetchAllUsers(result));
+    setData(result.users)
+    setTotalRows(result.total)
+    return {
+      total: result.total,
+      users: result.users,
+    };
   }
+
+  
 
   const usersList = async (pageIndex, pageSize) =>{
     const result = await AllUsers (pageIndex, pageSize);
     dispatch(fetchAllUsers(result));
+    setData(result.users)
+    setTotalRows(result.total)
     return {
       total: result.total,
       users: result.users,
@@ -99,6 +107,9 @@ function UsersTable() {
   useEffect(() =>{
     usersList(pageIndex, pageSize)
   },[]);
+
+  useEffect(()=>{
+  },[data])
 
   return (
     <DashboardLayout>
@@ -145,7 +156,7 @@ function UsersTable() {
           </Grid>
         </Grid>
       </MDBox>
-      <NotificationModel open={open} handleClose={handleClose} />
+      <NotificationModel open={open} handleClose={handleClose} data = {notificationData}/>
     </DashboardLayout>
   );
 }
