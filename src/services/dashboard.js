@@ -1,15 +1,42 @@
 import axios from "axios";
-// import { BaseURL } from "constants/globals";
-const BaseURL = "http://localhost:8000";
+import { BaseURL } from "constants/globals";
 
-export const Analytics = async () => {
+export const AnalyticAvg = async () => {
   try {
     const access_token = localStorage.getItem("admin_access_token");
     const headers = {
-        'accessToken': access_token
-    }
-    const response = await axios.get(BaseURL + "/admin/all_analytics", {
-      headers
+      accessToken: access_token,
+    };
+    const response = await axios.get(BaseURL + "/admin/analytics/avg", {
+      headers,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+export const AnalyticsPercentage = async () => {
+  try {
+    const access_token = localStorage.getItem("admin_access_token");
+    const headers = {
+      accessToken: access_token,
+    };
+    const response = await axios.get(BaseURL + "/admin/analytics/percentage", {
+      headers,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+export const AnalyticsOnBoardTime = async () => {
+  try {
+    const access_token = localStorage.getItem("admin_access_token");
+    const headers = {
+      accessToken: access_token,
+    };
+    const response = await axios.get(BaseURL + "/admin/on_boardtime_avg", {
+      headers,
     });
     return response.data;
   } catch (error) {
@@ -21,10 +48,10 @@ export const UserGrowthGraph = async () => {
   try {
     const access_token = localStorage.getItem("admin_access_token");
     const headers = {
-        'accessToken': access_token
-    }
+      accessToken: access_token,
+    };
     const response = await axios.get(BaseURL + "/admin/user_join_graph", {
-      headers
+      headers,
     });
     return response.data;
   } catch (error) {
@@ -36,8 +63,8 @@ export const UserAttributeGraph = async () => {
   try {
     const access_token = localStorage.getItem("admin_access_token");
     const headers = {
-        'accessToken': access_token
-    }
+      accessToken: access_token,
+    };
     const response = await axios.get(BaseURL + "/admin/user_attributes", {
       headers,
     });
@@ -49,10 +76,10 @@ export const UserAttributeGraph = async () => {
 
 export const AllUsers = async (pageIndex, pageSize) => {
   try {
-    const access_token = localStorage.getItem("admin_access_token")
+    const access_token = localStorage.getItem("admin_access_token");
     const headers = {
-        'accessToken': access_token
-    }
+      accessToken: access_token,
+    };
     const response = await axios.get(BaseURL + "/admin/all_users", {
       params: { limit: pageSize, offset: pageIndex * pageSize },
       headers,
@@ -63,8 +90,7 @@ export const AllUsers = async (pageIndex, pageSize) => {
   }
 };
 
-
-export const InviteListUsers = async (pageIndex, pageSize)  => {
+export const InviteListUsers = async (pageIndex, pageSize) => {
   try {
     const access_token = localStorage.getItem("admin_access_token");
     const headers = {
@@ -72,7 +98,7 @@ export const InviteListUsers = async (pageIndex, pageSize)  => {
     };
     const response = await axios.get(BaseURL + "/admin/invitelist_user", {
       params: { limit: pageSize, offset: pageIndex * pageSize },
-      headers
+      headers,
     });
     return response.data;
   } catch (error) {
@@ -88,7 +114,7 @@ export const SearchInInviteListUsers = async (pageIndex, pageSize, search) => {
     };
     const response = await axios.post(
       BaseURL + "/admin/search_invite_user",
-      { "search_name": search },
+      { search_name: search },
       { params: { limit: pageSize, offset: pageIndex * pageSize }, headers }
     );
     return response.data;
@@ -104,7 +130,7 @@ export const MostInviteListUsers = async (access_token) => {
       accessToken: access_token,
     };
     const response = await axios.get(BaseURL + "/admin/most_invitelist_user", {
-      headers
+      headers,
     });
     return response.data;
   } catch (error) {
@@ -216,7 +242,7 @@ export const BlockUser = async (data) => {
   }
 };
 
-export const SendNotification = async ( data) => {
+export const SendNotification = async (data) => {
   try {
     const access_token = localStorage.getItem("admin_access_token");
     const headers = {

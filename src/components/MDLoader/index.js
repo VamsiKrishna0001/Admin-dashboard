@@ -7,18 +7,6 @@ import CircularProgress, {
 } from '@mui/material/CircularProgress';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 
-const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
-  height: 10,
-  borderRadius: 5,
-  [`&.${linearProgressClasses.colorPrimary}`]: {
-    backgroundColor: theme.palette.grey[theme.palette.mode === 'light' ? 200 : 800],
-  },
-  [`& .${linearProgressClasses.bar}`]: {
-    borderRadius: 5,
-    backgroundColor: theme.palette.mode === 'light' ? '#1a90ff' : '#308fe8',
-  },
-}));
-
 // Inspired by the former Facebook spinners.
 function FacebookCircularProgress(props) {
   return (
@@ -54,7 +42,7 @@ function FacebookCircularProgress(props) {
   );
 }
 
-export default function GradientCircularProgress() {
+export default function GradientCircularProgress({ size = 20 }) {
   return (
     <React.Fragment>
       <svg width={0} height={0}>
@@ -65,9 +53,11 @@ export default function GradientCircularProgress() {
           </linearGradient>
         </defs>
       </svg>
-      <CircularProgress sx={{ 'svg circle': { stroke: 'url(#my_gradient)' } }} />
+      <CircularProgress 
+        sx={{ 'svg circle': { stroke: 'url(#my_gradient)' } }} 
+        size={size}
+      />
     </React.Fragment>
   );
 }
-
 

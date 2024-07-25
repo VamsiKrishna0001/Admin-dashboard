@@ -1,25 +1,7 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.2.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 import { useEffect, useState } from "react";
-
-// @mui material components
 import Card from "@mui/material/Card";
 import Switch from "@mui/material/Switch";
 
-// Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import { useDispatch } from "react-redux";
@@ -29,17 +11,33 @@ import { useAppSelector } from "hooks";
 import MDButton from "components/MDButton";
 
 function PlatformSettings() {
-  const access_token = localStorage.getItem('admin_access_token');
-  const {configuration_settings} = useAppSelector((state)=> state?.analytics);
-  const [bypassInviteUser, setBypassInviteUser] = useState(configuration_settings?.bypass_invite_user);
-  const [byPassSms, setByPassSms] = useState(configuration_settings?.bypass_sms);
-  const [byPassNumber, setByPassNumber] = useState(configuration_settings?.bypass_number);
+  const { configuration_settings } = useAppSelector(
+    (state) => state?.analytics
+  );
+  const [bypassInviteUser, setBypassInviteUser] = useState(
+    Object.keys(configuration_settings).length !== 0
+      ? configuration_settings?.bypass_invite_user
+      : false
+  );
+  const [byPassSms, setByPassSms] = useState(
+    Object.keys(configuration_settings).length !== 0
+      ? configuration_settings?.bypass_sms
+      : false
+  );
+  const [byPassNumber, setByPassNumber] = useState(
+    Object.keys(configuration_settings).length !== 0
+      ? configuration_settings?.bypass_number
+      : false
+  );
 
-  const dispatch = useDispatch()
-  const usersList = async ()=>{
+  const dispatch = useDispatch();
+  const usersList = async () => {
     const result = await ConfigurationsSettings();
+    setBypassInviteUser(result.bypass_invite_user);
+    setByPassSms(result.bypass_sms);
+    setByPassNumber(result.bypass_number);
     dispatch(fetchConfiguration(result));
-  }
+  };
 
   const update_configuration = async () => {
     const data = {
@@ -56,23 +54,30 @@ function PlatformSettings() {
     }
   };
 
-  useEffect(() =>{
-    usersList()
-  },[]);
+  useEffect(() => {
+    usersList();
+  }, []);
 
-  useEffect(() =>{
-
-  },[bypassInviteUser, byPassSms, byPassNumber])
+  useEffect(() => {}, [bypassInviteUser, byPassSms, byPassNumber]);
 
   return (
     <Card sx={{ boxShadow: "none" }}>
       <MDBox p={2}>
-        <MDTypography variant="h6" fontWeight="medium" textTransform="capitalize">
+        <MDTypography
+          variant="h6"
+          fontWeight="medium"
+          textTransform="capitalize"
+        >
           Agent Configurations
         </MDTypography>
       </MDBox>
       <MDBox pt={1} pb={2} px={2} lineHeight={1.25}>
-        <MDTypography variant="caption" fontWeight="bold" color="text" textTransform="uppercase">
+        <MDTypography
+          variant="caption"
+          fontWeight="bold"
+          color="text"
+          textTransform="uppercase"
+        >
           settings
         </MDTypography>
         <MDBox display="flex" alignItems="center" mb={0.5} ml={-1.5}>
@@ -82,7 +87,10 @@ function PlatformSettings() {
             </MDTypography>
           </MDBox>
           <MDBox mt={0.5}>
-            <Switch checked={bypassInviteUser} onChange={() => setBypassInviteUser(!bypassInviteUser)} />
+            <Switch
+              checked={bypassInviteUser}
+              onChange={() => setBypassInviteUser(!bypassInviteUser)}
+            />
           </MDBox>
         </MDBox>
         <MDBox display="flex" alignItems="center" mb={0.5} ml={-1.5}>
@@ -92,7 +100,10 @@ function PlatformSettings() {
             </MDTypography>
           </MDBox>
           <MDBox mt={0.5}>
-            <Switch checked={byPassSms} onChange={() => setByPassSms(!byPassSms)} />
+            <Switch
+              checked={byPassSms}
+              onChange={() => setByPassSms(!byPassSms)}
+            />
           </MDBox>
         </MDBox>
         <MDBox display="flex" alignItems="center" mb={0.5} ml={-1.5}>
@@ -102,14 +113,20 @@ function PlatformSettings() {
             </MDTypography>
           </MDBox>
           <MDBox mt={0.5}>
-            <Switch checked={byPassNumber} onChange={() => setByPassNumber(!byPassNumber)} />
+            <Switch
+              checked={byPassNumber}
+              onChange={() => setByPassNumber(!byPassNumber)}
+            />
           </MDBox>
         </MDBox>
-
       </MDBox>
       <MDBox p={2}>
-        <MDButton variant="gradient" color="info" onClick={update_configuration}>
-         Save
+        <MDButton
+          variant="gradient"
+          color="info"
+          onClick={update_configuration}
+        >
+          Save
         </MDButton>
       </MDBox>
     </Card>

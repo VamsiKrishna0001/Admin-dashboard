@@ -20,12 +20,10 @@ import { MostInviteListUsers } from "services/dashboard";
 import { useEffect, useState } from "react";
 
 function MostInviteUsersTable() {
-  const customEntriesPerPage = { defaultValue: 10, entries: [10, 25, 50] };
-  const access_token = localStorage.getItem('admin_access_token');
-  const {most_invited_users_list} = useAppSelector((state)=> state?.analytics);
   const dispatch = useDispatch()
-  const [data, setData] = useState(most_invited_users_list ? most_invited_users_list?.users : [])
-  const [filterData, setFilterData] = useState(most_invited_users_list?.users);
+  const {most_invited_users_list} = useAppSelector((state)=> state?.analytics);
+  const [data, setData] = useState(Object.keys(most_invited_users_list).length !== 0 ? most_invited_users_list?.users : [])
+  const [filterData, setFilterData] = useState(Object.keys(most_invited_users_list).length !== 0 ? most_invited_users_list?.users : [])
   let { columns, rows } = tableData(data);
 
   const handleSearch = (search) => {

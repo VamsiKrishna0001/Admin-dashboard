@@ -1,7 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    anlaytics_list: null,
+    analytics_avg: {},
+    analytics_percentage: {},
+    analytics_onboard_time: '00:00:00',
     user_growth_graph: {},
     user_attribute_graph: {},
     all_users_list: {},
@@ -20,8 +22,16 @@ const initialState = {
       fetchAnalyticsDataStart: (state) => {
         state.loading = true;
       },
-      fetchAnalytics: (state, action) => {
-        state.anlaytics_list = action.payload;
+      fetchAnalyticsOnBoard: (state, action) => {
+        state.analytics_onboard_time = action.payload;
+        state.loading = false;
+      },
+      fetchAnalyticsAvg: (state, action) => {
+        state.analytics_avg = action.payload;
+        state.loading = false;
+      },
+      fetchAnalyticsPercentage: (state, action) => {
+        state.analytics_percentage = action.payload;
         state.loading = false;
       },
       fetchUsersGrowthGraph: (state, action) => {
@@ -56,23 +66,11 @@ const initialState = {
         state.loading = false;
       },
       fetchAnalyticsDataReset: (state) => {
-        // state.percent_invited_user_account = null;
-        // state.invited_other_users = null,
-        // state.avg_invited_user = null,
-        // state.avg_users_on_wait_list = AnalyticsResponse,
-        // state.avg_users_preset = null,
-        // state.shared_attribute_connection = null,
-        // state.onboarding_time_avg = null,
-        // state.avg_number_of_connection_added_via_search = null,
-        // state.avg_number_of_manual_contact_added_via_search = null,
-        // state.percentage_successful_authentication = null,
-        // state.percentage_of_push_notification = null,
-        // state.users_import_connection_percentage = null,
         state.loading = false;
       }
     },
   });
   
   
-  export const { fetchAnalyticsDataStart, fetchConfiguration, fetchSmsUsers,fetchMostInvitedUsers, fetchInvitedUsers, fetchAllUsers, fetchUsersAttributesGraph, fetchUsersGrowthGraph, fetchAnalyticsDataReset, fetchAnalytics, fetchAnalyticsDataFailure } = analytics.actions;
+  export const { fetchAnalyticsDataStart, fetchAnalyticsOnBoard, fetchAnalyticsAvg, fetchAnalyticsPercentage, fetchConfiguration, fetchSmsUsers,fetchMostInvitedUsers, fetchInvitedUsers, fetchAllUsers, fetchUsersAttributesGraph, fetchUsersGrowthGraph, fetchAnalyticsDataReset, fetchAnalyticsDataFailure } = analytics.actions;
   export default analytics.reducer;
